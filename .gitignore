@@ -51,3 +51,10 @@ venv.bak/
 
 # Logs
 *.log
+
+# Directories to exclude
+ui2_backup/
+Temp_files/
+demo-website/
+build/
+dist/
