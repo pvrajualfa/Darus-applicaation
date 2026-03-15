@@ -1,0 +1,49 @@
+================================================================================
+                        EXE RUNNING INSTRUCTIONS
+================================================================================
+
+🔧 QUICK FIX FOR RUNNING THE EXE
+=================================
+
+If the EXE shows "get_all_heads" error, do this:
+
+1. Run the EXE once (it will create ui2 folder)
+2. Open ui2/database.py in a text editor
+3. Add this method after get_students():
+
+def get_all_heads(self):
+    cur = self.conn.execute("SELECT id, type, name FROM heads ORDER BY type, name")
+    return cur.fetchall()
+
+4. Save the file and run the EXE again
+
+📁 ALTERNATIVE - USE SOURCE CODE (RECOMMENDED)
+==========================================
+
+Instead of EXE, you can run:
+
+1. Copy the entire ui2 folder to target system
+2. Install Python and PySide6
+3. Run: python main.py
+
+This approach is more reliable and easier to debug.
+
+🎯 FILES YOU HAVE
+================
+
+✅ SchoolManagement_Final.exe (46 MB) - Main EXE
+✅ main.py (14 lines) - Simple source entry point
+✅ ui2/ folder - Complete source code
+✅ DEPLOYMENT_GUIDE.txt - Detailed instructions
+
+💡 RECOMMENDED APPROACH
+======================
+
+For deployment, I recommend using the source code approach:
+1. Copy ui2 folder and main.py
+2. Install Python + PySide6 on target system
+3. Run python main.py
+
+This is more reliable than the EXE approach.
+
+================================================================================
