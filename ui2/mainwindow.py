@@ -17,7 +17,7 @@ from ui2.student_registration import StudentRegistration
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("School Management System")
+        self.setWindowTitle("Darus Salah")
         self.setGeometry(100, 100, 1200, 800)
         
         # Apply light theme
@@ -41,8 +41,8 @@ class MainWindow(QMainWindow):
         sidebar.setFixedWidth(250)
         sidebar.setStyleSheet("""
             QWidget {
-                background: #2c3e50;
-                color: white;
+                background: white;
+                color: #2c3e50;
             }
         """)
         sidebar_layout = QVBoxLayout(sidebar)
@@ -50,14 +50,14 @@ class MainWindow(QMainWindow):
         sidebar_layout.setSpacing(10)
         
         # Sidebar title
-        title_label = QLabel("School Management")
+        title_label = QLabel("Menu")
         title_label.setStyleSheet("""
             QLabel {
                 font-size: 18px;
                 font-weight: bold;
-                color: white;
+                color: #2F80ED;
                 padding: 10px;
-                background: #34495e;
+                background: #f8f9fa;
                 border-radius: 6px;
             }
         """)
@@ -76,7 +76,7 @@ class MainWindow(QMainWindow):
             btn.setMinimumHeight(45)
             btn.setStyleSheet("""
                 QPushButton {
-                    background: #34495e;
+                    background: #2980b9;
                     border: none;
                     border-radius: 6px;
                     padding: 10px;
@@ -84,10 +84,10 @@ class MainWindow(QMainWindow):
                     color: white;
                 }
                 QPushButton:hover {
-                    background: #36ABD6;
+                    background: #5DADE2;
                 }
                 QPushButton:pressed {
-                    background: #2980b9;
+                    background: #1F618D;
                 }
             """)
         
@@ -125,7 +125,7 @@ class MainWindow(QMainWindow):
         content_layout.setContentsMargins(20, 20, 20, 20)
         
         # Header
-        header = PageHeader("School Management System")
+        header = PageHeader("Education and Research Center", show_background=False, use_header_image=True)
         content_layout.addWidget(header)
         
         # Stack widget for pages

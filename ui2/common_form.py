@@ -93,7 +93,7 @@ def style_button(btn):
     btn.setMinimumHeight(36)
     btn.setStyleSheet("""
         QPushButton {
-            background:#36ABD6;
+            background:#38b6ff;
             color:white;
             border:none;
             border-radius:6px;
@@ -101,15 +101,16 @@ def style_button(btn):
             padding:8px 16px;
         }
         QPushButton:hover {
-            background:#1D4ED8;
+            background:#2196F3;
         }
         QPushButton:pressed {
-            background:#0F3D91;
+            background:#1976D2;
         }
     """)
 
 def style_dateedit(widget):
     widget.setMinimumHeight(34)
+    widget.setMinimumWidth(120)  # Add minimum width to prevent cutoff
     widget.setStyleSheet("""
         QDateEdit {
             border:1px solid #d0d0d0;
