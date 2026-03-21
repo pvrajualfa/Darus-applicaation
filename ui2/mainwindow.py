@@ -9,10 +9,12 @@ if __name__ == "__main__":
 
 from ui2.header import PageHeader
 from ui2.vouchers import VoucherPage
+from ui2.voucher_list import VoucherListPage
 from ui2.reports import ReportPage
 from ui2.heads import HeadPage
 from ui2.student_list import StudentListPage
 from ui2.student_registration import StudentRegistration
+from ui2.common_form import style_button
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -46,60 +48,136 @@ class MainWindow(QMainWindow):
             }
         """)
         sidebar_layout = QVBoxLayout(sidebar)
-        sidebar_layout.setContentsMargins(10, 20, 10, 20)
-        sidebar_layout.setSpacing(10)
+        sidebar_layout.setContentsMargins(15, 20, 15, 20)
+        sidebar_layout.setSpacing(5)
         
         # Sidebar title
-        title_label = QLabel("Menu")
+        title_label = QLabel("MENU")
         title_label.setStyleSheet("""
             QLabel {
-                font-size: 18px;
+                font-size: 22px;
                 font-weight: bold;
-                color: #2F80ED;
-                padding: 10px;
-                background: #f8f9fa;
-                border-radius: 6px;
+                color: #1B3C5A;
+                font-family: Helvetica;
+                padding: 15px;
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                border-radius: 10px;
+                border: 2px solid #dee2e6;
             }
         """)
         title_label.setAlignment(Qt.AlignCenter)
         sidebar_layout.addWidget(title_label)
         
         # Navigation buttons
-        self.btn_vouchers = QPushButton("Vouchers")
+        # Voucher section
+        self.voucher_group = QWidget()
+        voucher_group_layout = QVBoxLayout(self.voucher_group)
+        voucher_group_layout.setContentsMargins(0, 12, 0, 12)
+        voucher_group_layout.setSpacing(5)
+        
+        voucher_label = QLabel("VOUCHER")
+        voucher_label.setStyleSheet("""
+            QLabel {
+                font-size: 16px;
+                font-weight: bold;
+                color: #546E7A;
+                font-family: Arial;
+                padding: 8px 0px;
+                background: transparent;
+                margin-bottom: 8px;
+            }
+        """)
+        
+        self.btn_vouchers = QPushButton("New Voucher")
+        self.btn_vouchers.setFixedWidth(160)
+        self.btn_voucher_list = QPushButton("Voucher List")
+        self.btn_voucher_list.setFixedWidth(160)
+        
+        voucher_group_layout.addWidget(voucher_label)
+        voucher_group_layout.addWidget(self.btn_vouchers)
+        voucher_group_layout.addWidget(self.btn_voucher_list)
+        
+        # Add separator
+        separator1 = QFrame()
+        separator1.setFrameShape(QFrame.HLine)
+        separator1.setStyleSheet("QFrame { background-color: #e0e0e0; max-height: 1px; }")
+        voucher_group_layout.addWidget(separator1)
+        
+        # Student section
+        self.student_group = QWidget()
+        student_group_layout = QVBoxLayout(self.student_group)
+        student_group_layout.setContentsMargins(0, 12, 0, 12)
+        student_group_layout.setSpacing(5)
+        
+        student_label = QLabel("STUDENT")
+        student_label.setStyleSheet("""
+            QLabel {
+                font-size: 16px;
+                font-weight: bold;
+                color: #2E7D32;
+                font-family: Arial;
+                padding: 8px 0px;
+                background: transparent;
+                margin-bottom: 8px;
+            }
+        """)
+        
+        self.btn_registration = QPushButton("New Registration")
+        self.btn_registration.setFixedWidth(160)
+        self.btn_students = QPushButton("Student List")
+        self.btn_students.setFixedWidth(160)
+        
+        student_group_layout.addWidget(student_label)
+        student_group_layout.addWidget(self.btn_registration)
+        student_group_layout.addWidget(self.btn_students)
+        
+        # Add separator
+        separator2 = QFrame()
+        separator2.setFrameShape(QFrame.HLine)
+        separator2.setStyleSheet("QFrame { background-color: #e0e0e0; max-height: 1px; }")
+        student_group_layout.addWidget(separator2)
+        
+        # Management section
+        self.management_group = QWidget()
+        management_group_layout = QVBoxLayout(self.management_group)
+        management_group_layout.setContentsMargins(0, 12, 0, 12)
+        management_group_layout.setSpacing(5)
+        
+        management_label = QLabel("MANAGEMENT")
+        management_label.setStyleSheet("""
+            QLabel {
+                font-size: 16px;
+                font-weight: bold;
+                color: #C62828;
+                font-family: Arial;
+                padding: 8px 0px;
+                background: transparent;
+                margin-bottom: 8px;
+            }
+        """)
+        
         self.btn_reports = QPushButton("Reports")
+        self.btn_reports.setFixedWidth(160)
         self.btn_heads = QPushButton("Manage Heads")
-        self.btn_students = QPushButton("Students")
-        self.btn_registration = QPushButton("Student Registration")
+        self.btn_heads.setFixedWidth(160)
         
-        # Style sidebar buttons
-        for btn in [self.btn_vouchers, self.btn_reports, self.btn_heads, self.btn_students, self.btn_registration]:
-            btn.setMinimumHeight(45)
-            btn.setStyleSheet("""
-                QPushButton {
-                    background: #2980b9;
-                    border: none;
-                    border-radius: 6px;
-                    padding: 10px;
-                    font-weight: bold;
-                    color: white;
-                }
-                QPushButton:hover {
-                    background: #5DADE2;
-                }
-                QPushButton:pressed {
-                    background: #1F618D;
-                }
-            """)
+        management_group_layout.addWidget(management_label)
+        management_group_layout.addWidget(self.btn_reports)
+        management_group_layout.addWidget(self.btn_heads)
         
-        sidebar_layout.addWidget(self.btn_vouchers)
-        sidebar_layout.addWidget(self.btn_reports)
-        sidebar_layout.addWidget(self.btn_heads)
-        sidebar_layout.addWidget(self.btn_students)
-        sidebar_layout.addWidget(self.btn_registration)
+        # Style sidebar buttons with common_form theme
+        for btn in [self.btn_vouchers, self.btn_voucher_list, self.btn_registration, self.btn_students, self.btn_reports, self.btn_heads]:
+            style_button(btn)
+        
+        # Add groups to sidebar with proper spacing
+        sidebar_layout.addWidget(self.voucher_group)
+        sidebar_layout.addWidget(self.student_group)
+        sidebar_layout.addWidget(self.management_group)
         sidebar_layout.addStretch()
         
         # Exit button
         self.btn_exit = QPushButton("Exit")
+        self.btn_exit.setFixedWidth(160)
         self.btn_exit.setMinimumHeight(45)
         self.btn_exit.setStyleSheet("""
             QPushButton {
@@ -134,6 +212,7 @@ class MainWindow(QMainWindow):
         
         # Create pages
         self.voucher_page = VoucherPage()
+        self.voucher_list_page = VoucherListPage()
         self.report_page = ReportPage()
         self.head_page = HeadPage()
         self.student_list_page = StudentListPage()
@@ -141,6 +220,7 @@ class MainWindow(QMainWindow):
         
         # Add pages to stack
         self.stack.addWidget(self.voucher_page)
+        self.stack.addWidget(self.voucher_list_page)
         self.stack.addWidget(self.report_page)
         self.stack.addWidget(self.head_page)
         self.stack.addWidget(self.student_list_page)
@@ -150,6 +230,7 @@ class MainWindow(QMainWindow):
         
         # Connect signals
         self.btn_vouchers.clicked.connect(lambda: self.stack.setCurrentWidget(self.voucher_page))
+        self.btn_voucher_list.clicked.connect(lambda: self.stack.setCurrentWidget(self.voucher_list_page))
         self.btn_reports.clicked.connect(lambda: self.stack.setCurrentWidget(self.report_page))
         self.btn_heads.clicked.connect(lambda: self.stack.setCurrentWidget(self.head_page))
         self.btn_students.clicked.connect(lambda: self.stack.setCurrentWidget(self.student_list_page))

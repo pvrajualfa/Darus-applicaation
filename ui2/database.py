@@ -116,3 +116,10 @@ class Database:
     def add_head(self, typ, head):
         self.conn.execute("INSERT INTO heads(type,name) VALUES(?,?)", (typ, head))
         self.conn.commit()
+
+    def get_total_paid(self, student_name):
+        result = self.conn.execute(
+            "SELECT COALESCE(SUM(amount), 0) FROM vouchers WHERE student_name=? AND type='Income'",
+            (student_name,)
+        ).fetchone()
+        return result[0] if result else 0

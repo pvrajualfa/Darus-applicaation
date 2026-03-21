@@ -14,6 +14,7 @@ class HeadPage(QWidget):
         super().__init__()
         self.db = Database()
         self.entry_mode = "HEAD"
+        self.selected_section = "ALL"  # Track selected section: "ALL", "HEAD", "SUBHEAD"
 
         layout = QVBoxLayout(self)
         layout.addWidget(PageHeader("Manage Heads"))
@@ -76,6 +77,13 @@ class HeadPage(QWidget):
         head_group.setLayout(head_group_layout)
         style_groupbox(head_group)
         head_layout.addWidget(head_group)
+        
+        # Store reference for visual feedback
+        self.head_group = head_group
+        
+        # Make head section clickable
+        head_widget.setCursor(Qt.PointingHandCursor)
+        head_widget.mousePressEvent = lambda e: self.select_section("HEAD")
         
         head_widget.setLayout(head_layout)
         main_layout.addWidget(head_widget)
@@ -147,6 +155,13 @@ class HeadPage(QWidget):
         style_groupbox(sub_group)
         subhead_layout.addWidget(sub_group)
         
+        # Store reference for visual feedback
+        self.sub_group = sub_group
+        
+        # Make subhead section clickable
+        subhead_widget.setCursor(Qt.PointingHandCursor)
+        subhead_widget.mousePressEvent = lambda e: self.select_section("SUBHEAD")
+        
         subhead_widget.setLayout(subhead_layout)
         main_layout.addWidget(subhead_widget)
         main_layout.addStretch()
@@ -159,7 +174,36 @@ class HeadPage(QWidget):
         self.table.setAlternatingRowColors(True)
         self.table.verticalHeader().setVisible(False)
         self.table.cellDoubleClicked.connect(self.select_row)
+        
+        # Make table clickable to reset filter
+        self.table.mousePressEvent = self.table_mouse_press
         layout.addWidget(self.table)
+        
+        # ================= SELECTION INFO =================
+        selection_layout = QHBoxLayout()
+        self.selection_label = QLabel("Showing: All Data")
+        self.selection_label.setStyleSheet("color: #666; font-size: 12px; padding: 5px;")
+        
+        self.btn_show_all = QPushButton("Show All")
+        self.btn_show_all.setFixedWidth(80)
+        self.btn_show_all.setStyleSheet("""
+            QPushButton {
+                background-color: #f5f5f5;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                padding: 4px 8px;
+                font-size: 11px;
+            }
+            QPushButton:hover {
+                background-color: #e0e0e0;
+            }
+        """)
+        self.btn_show_all.clicked.connect(lambda: self.select_section("ALL"))
+        
+        selection_layout.addWidget(self.selection_label)
+        selection_layout.addStretch()
+        selection_layout.addWidget(self.btn_show_all)
+        layout.addLayout(selection_layout)
 
         # ================= DELETE BUTTON =================
         btn_layout = QHBoxLayout()
@@ -177,6 +221,13 @@ class HeadPage(QWidget):
         self.btn_delete.clicked.connect(self.delete_selected)
         self.head_type.currentTextChanged.connect(self.load_heads)
         self.sub_type.currentTextChanged.connect(self.load_heads)
+        
+        # Add type filtering connections
+        self.head_type.currentTextChanged.connect(self.filter_by_type)
+        self.sub_type.currentTextChanged.connect(self.filter_by_type)
+        
+        # Add head selection filtering for subheads
+        self.sub_head_combo.currentTextChanged.connect(self.filter_by_head)
 
         # ================= INITIAL LOAD =================
         self.load_data()
@@ -233,14 +284,50 @@ class HeadPage(QWidget):
     def load_data(self):
         data = []
         
-        heads = self.db.get_all_heads()
-        for head in heads:
-            data.append(("HEAD", head[1], head[0], "", ""))
+        # Get current type filter from either dropdown (they should be in sync)
+        current_type = self.head_type.currentText()
         
-        for head in heads:
-            subheads = self.db.get_subheads_by_headid(head[0])
-            for subhead in subheads:
-                data.append(("SUBHEAD", subhead[1], head[1], head[0], subhead[0]))
+        # Get selected head for subhead filtering
+        selected_head_name = self.sub_head_combo.currentText()
+        selected_head_id = None
+        
+        # Get head ID if a specific head is selected (not "Select Head")
+        if selected_head_name != "Select Head":
+            current_index = self.sub_head_combo.currentIndex()
+            if current_index > 0:  # Skip "Select Head" at index 0
+                selected_head_id = self.sub_head_combo.itemData(current_index)
+        
+        if self.selected_section == "ALL":
+            heads = self.db.get_all_heads()
+            for head in heads:
+                # Filter by type (type is at index 1: id, type, name)
+                if head[1] == current_type:
+                    data.append(("HEAD", head[2], head[0], "", ""))
+            
+            for head in heads:
+                if head[1] == current_type:  # Filter by type
+                    # Additional head filter for subheads
+                    if selected_head_id is None or head[0] == selected_head_id:
+                        subheads = self.db.get_subheads_by_headid(head[0])
+                        for subhead in subheads:
+                            data.append(("SUBHEAD", subhead[1], head[2], head[0], subhead[0]))
+                    
+        elif self.selected_section == "HEAD":
+            heads = self.db.get_all_heads()
+            for head in heads:
+                # Filter by type (type is at index 1: id, type, name)
+                if head[1] == current_type:
+                    data.append(("HEAD", head[2], head[0], "", ""))
+                
+        elif self.selected_section == "SUBHEAD":
+            heads = self.db.get_all_heads()
+            for head in heads:
+                if head[1] == current_type:  # Filter by type
+                    # Additional head filter for subheads
+                    if selected_head_id is None or head[0] == selected_head_id:
+                        subheads = self.db.get_subheads_by_headid(head[0])
+                        for subhead in subheads:
+                            data.append(("SUBHEAD", subhead[1], head[2], head[0], subhead[0]))
         
         self.table.setRowCount(len(data))
         self.table.setColumnCount(5)
@@ -295,3 +382,101 @@ class HeadPage(QWidget):
     def delete_subhead(self, subhead_id):
         self.db.conn.execute("DELETE FROM subheads WHERE id = ?", (subhead_id,))
         self.db.conn.commit()
+        
+    def select_section(self, section):
+        """Handle section selection and update table display"""
+        self.selected_section = section
+        
+        # Update selection label with filters
+        self.update_selection_label()
+        
+        # Reload data with filter
+        self.load_data()
+        
+        # Visual feedback - update groupbox styles
+        self.update_section_styles()
+        
+    def filter_by_type(self):
+        """Handle type change and update table display"""
+        # Reload data when type changes
+        self.load_data()
+        
+        # Update selection label with new type
+        self.update_selection_label()
+        
+    def filter_by_head(self):
+        """Handle head selection change and update table display"""
+        # Reload data when head selection changes
+        self.load_data()
+        
+        # Update selection label with new head selection
+        self.update_selection_label()
+        
+    def update_selection_label(self):
+        """Update selection label based on current filters"""
+        current_type = self.head_type.currentText()
+        selected_head_name = self.sub_head_combo.currentText()
+        
+        if self.selected_section == "ALL":
+            if selected_head_name == "Select Head":
+                self.selection_label.setText(f"Showing: All {current_type} Data")
+            else:
+                self.selection_label.setText(f"Showing: All {current_type} Data for '{selected_head_name}'")
+        elif self.selected_section == "HEAD":
+            self.selection_label.setText(f"Showing: {current_type} Heads Only")
+        elif self.selected_section == "SUBHEAD":
+            if selected_head_name == "Select Head":
+                self.selection_label.setText(f"Showing: {current_type} Subheads Only")
+            else:
+                self.selection_label.setText(f"Showing: {current_type} Subheads for '{selected_head_name}'")
+        
+    def update_section_styles(self):
+        """Update visual styles based on selected section"""
+        # Reset both groupboxes to default style
+        self.head_group.setStyleSheet("")
+        self.sub_group.setStyleSheet("")
+        style_groupbox(self.head_group)
+        style_groupbox(self.sub_group)
+        
+        # Highlight selected section
+        if self.selected_section == "HEAD":
+            self.head_group.setStyleSheet("""
+                QGroupBox {
+                    border: 2px solid #4CAF50;
+                    border-radius: 8px;
+                    margin-top: 10px;
+                    padding-top: 10px;
+                    background-color: #f0f8f0;
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    left: 10px;
+                    padding: 0 5px 0 5px;
+                    color: #4CAF50;
+                    font-weight: bold;
+                }
+            """)
+        elif self.selected_section == "SUBHEAD":
+            self.sub_group.setStyleSheet("""
+                QGroupBox {
+                    border: 2px solid #2196F3;
+                    border-radius: 8px;
+                    margin-top: 10px;
+                    padding-top: 10px;
+                    background-color: #f0f8ff;
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    left: 10px;
+                    padding: 0 5px 0 5px;
+                    color: #2196F3;
+                    font-weight: bold;
+                }
+            """)
+    
+    def table_mouse_press(self, event):
+        """Handle mouse press on table to reset filter"""
+        if event.button() == Qt.LeftButton:
+            self.select_section("ALL")
+        # Call the original table mouse press event
+        QTableWidget.mousePressEvent(self.table, event)

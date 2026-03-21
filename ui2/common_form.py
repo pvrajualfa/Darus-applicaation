@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QLineEdit, QComboBox, QPushButton, QDateEdit, QLabel, QGroupBox
 from PySide6.QtCore import Qt, Signal, QObject
+from PySide6.QtGui import QIcon
 
 class DataManager(QObject):
     student_updated = Signal()
@@ -90,21 +91,29 @@ def style_combo(widget):
     """)
 
 def style_button(btn):
-    btn.setMinimumHeight(36)
+    btn.setMinimumHeight(40)
+    btn.setMinimumWidth(160)
+    # Explicitly remove any icons
+    btn.setIcon(QIcon())
+    btn.setText(btn.text().replace("📝", "").replace("📊", "").replace("🎓", "").replace("👨‍🎓", "").replace("📈", "").replace("🏷️", "").strip())
     btn.setStyleSheet("""
         QPushButton {
-            background:#38b6ff;
-            color:white;
-            border:none;
-            border-radius:6px;
-            font-weight:bold;
-            padding:8px 16px;
+            background: #00B4DB;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 15px;
+            font-family: Helvetica;
+            padding: 10px 15px;
+            margin: 2px 0px;
+            text-align: center;
         }
         QPushButton:hover {
-            background:#2196F3;
+            background: #0083B0;
         }
         QPushButton:pressed {
-            background:#1976D2;
+            background: #006A8C;
         }
     """)
 
