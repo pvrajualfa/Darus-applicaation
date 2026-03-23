@@ -1,0 +1,14 @@
+# PyCharm VM Options for better Cascade/Windsurf performance
+-Xms2g
+-Xmx4g
+-XX:ReservedCodeCacheSize=512m
+-XX:+UseG1GC
+-XX:SoftRefLRUPolicyMSPerMB=50
+-XX:+UseStringDeduplication
+-XX:MaxGCPauseMillis=200
+-XX:ParallelGCThreads=4
+-XX:ConcGCThreads=2
+-Djava.awt.headless=false
+-Dide.plugins.snapshot.on.unexpected.fail=true
+-Dide.no.platform.update=true
+-Dsun.tools.attach.attachTimeout=10000

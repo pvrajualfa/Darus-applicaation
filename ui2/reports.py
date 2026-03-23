@@ -30,12 +30,44 @@ class ReportPage(QWidget):
 
        tabs = QTabWidget()
        tabs.setStyleSheet("""
+       QTabWidget::pane {
+           border: 2px solid #E1E8ED;
+           background-color: #FFFFFF;
+           border-radius: 8px;
+           margin-top: -1px;
+       }
        QTabBar::tab {
-           font-weight: bold;
-           padding: 6px 12px;
+           background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
+                                stop:0 #F8F9FA, stop:1 #E9ECEF);
+           border: 2px solid #E1E8ED;
+           border-bottom: none;
+           border-radius: 8px 8px 0 0;
+           padding: 12px 24px;
+           margin-right: 4px;
+           font-weight: 600;
+           font-size: 14px;
+           color: #495057;
+           min-width: 100px;
        }
        QTabBar::tab:selected {
-           color: #1D4ED8;
+           background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
+                                stop:0 #FFFFFF, stop:1 #F8F9FA);
+           border: 2px solid #4285F4;
+           border-bottom: 2px solid #FFFFFF;
+           color: #4285F4;
+           margin-top: -2px;
+       }
+       QTabBar::tab:hover:!selected {
+           background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
+                                stop:0 #FFFFFF, stop:1 #E8F0FE);
+           border-color: #4285F4;
+           color: #1A73E8;
+       }
+       QTabBar::tab:first {
+           margin-left: 8px;
+       }
+       QTabBar::tab:last {
+           margin-right: 8px;
        }
        """)
        
@@ -188,6 +220,7 @@ class FinancePage(QWidget):
 class FeePage(QWidget):
    def __init__(self):
        super().__init__()
+       print("FeePage initialized - content should be visible")
        self.db = Database()
        layout = QVBoxLayout(self)
        layout.setSpacing(12)
@@ -256,8 +289,11 @@ class FeePage(QWidget):
        # Table
        self.table = QTableWidget()
        style_table(self.table)
+       print("FeePage: Table widget created")
        layout.addWidget(self.table)
-       self.load_report()
+       print("FeePage: Table added to layout")
+       # Don't auto-load - user will click "Load Report" button
+       print("FeePage: setup complete - waiting for user to click Load Report")
 
    def load_report(self):
        students = self.db.get_students()
@@ -270,7 +306,13 @@ class FeePage(QWidget):
        # Calculate fee information
        fee_data = []
        total_pending = 0.0
-       total_students = len(students)
+       total_students = len(students)  # This should be correct after filtering
+       
+       # Debug: Print to verify filtering
+       print(f"Selected class: {selected_class}")
+       print(f"Total students after filtering: {total_students}")
+       for student in students:
+           print(f"Student: {student[2]}, Class: {student[7]}")
        
        for student in students:
            student_id = student[1]
@@ -339,9 +381,14 @@ class FeePage(QWidget):
            self.table.setItem(row, 8, QTableWidgetItem(f"{data['due_months']:.1f}"))
        
        # Update summary
+       if selected_class == "All":
+           class_text = "All Classes"
+       else:
+           class_text = f"Class {selected_class}"
+           
        summary_text = f"""
        <div style="text-align: center;">
-           <div style="margin: 5px 0;"><strong>Total Students:</strong> {total_students}</div>
+           <div style="margin: 5px 0;"><strong>Total Students in {class_text}:</strong> {total_students}</div>
            <div style="margin: 5px 0;"><strong>Total Pending Fees:</strong> Rs.{total_pending:,.2f}</div>
            <div style="margin: 5px 0; color: #666;">Academic Year: {self.academic_year.currentText()} (June-May)</div>
        </div>
@@ -428,9 +475,14 @@ class FeePage(QWidget):
            self.table.setItem(row, 8, QTableWidgetItem(f"{data['due_months']:.1f}"))
        
        # Update summary for pending fees
+       if selected_class == "All":
+           class_text = "All Classes"
+       else:
+           class_text = f"Class {selected_class}"
+           
        summary_text = f"""
        <div style="text-align: center;">
-           <div style="margin: 5px 0; color: #D32F2F;"><strong>Students with Pending Fees:</strong> {len(pending_students)}</div>
+           <div style="margin: 5px 0; color: #D32F2F;"><strong>Students with Pending Fees in {class_text}:</strong> {len(pending_students)}</div>
            <div style="margin: 5px 0; color: #D32F2F;"><strong>Total Pending Amount:</strong> Rs.{total_pending:,.2f}</div>
            <div style="margin: 5px 0; color: #666;">Academic Year: {self.academic_year.currentText()} (June-May)</div>
        </div>

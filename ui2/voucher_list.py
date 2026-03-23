@@ -130,7 +130,11 @@ class VoucherListPage(QWidget):
             for row, voucher in enumerate(vouchers):
                 # Get basic voucher data
                 for col in range(8):  # ID, Date, Type, Head, Subhead, Student, Class, Amount, Mode
-                    self.table.setItem(row, col, QTableWidgetItem(str(voucher[col])))
+                    if col == 7:  # Amount column - format as currency
+                        amount = float(voucher[col]) if voucher[col] else 0.0
+                        self.table.setItem(row, col, QTableWidgetItem(f"Rs.{amount:,.2f}"))
+                    else:
+                        self.table.setItem(row, col, QTableWidgetItem(str(voucher[col])))
                 
                 # Calculate months paid for fee payments
                 months_paid = ""

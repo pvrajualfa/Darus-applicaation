@@ -80,7 +80,7 @@ class MainWindow(QMainWindow):
             QLabel {
                 font-size: 16px;
                 font-weight: bold;
-                color: #546E7A;
+                color: #1B3C5A;
                 font-family: Arial;
                 padding: 8px 0px;
                 background: transparent;
@@ -114,7 +114,7 @@ class MainWindow(QMainWindow):
             QLabel {
                 font-size: 16px;
                 font-weight: bold;
-                color: #2E7D32;
+                color: #1B3C5A;
                 font-family: Arial;
                 padding: 8px 0px;
                 background: transparent;
@@ -148,7 +148,7 @@ class MainWindow(QMainWindow):
             QLabel {
                 font-size: 16px;
                 font-weight: bold;
-                color: #C62828;
+                color: #1B3C5A;
                 font-family: Arial;
                 padding: 8px 0px;
                 background: transparent;
@@ -186,6 +186,7 @@ class MainWindow(QMainWindow):
                 border-radius: 6px;
                 padding: 10px;
                 font-weight: bold;
+                font-size: 14px;
                 color: white;
             }
             QPushButton:hover {
@@ -229,14 +230,24 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(content_widget)
         
         # Connect signals
-        self.btn_vouchers.clicked.connect(lambda: self.stack.setCurrentWidget(self.voucher_page))
-        self.btn_voucher_list.clicked.connect(lambda: self.stack.setCurrentWidget(self.voucher_list_page))
-        self.btn_reports.clicked.connect(lambda: self.stack.setCurrentWidget(self.report_page))
-        self.btn_heads.clicked.connect(lambda: self.stack.setCurrentWidget(self.head_page))
-        self.btn_students.clicked.connect(lambda: self.stack.setCurrentWidget(self.student_list_page))
-        self.btn_registration.clicked.connect(lambda: self.stack.setCurrentWidget(self.registration_page))
+        self.btn_vouchers.clicked.connect(lambda: self.switch_to_tab(self.voucher_page))
+        self.btn_voucher_list.clicked.connect(lambda: self.switch_to_tab(self.voucher_list_page))
+        self.btn_reports.clicked.connect(lambda: self.switch_to_tab(self.report_page))
+        self.btn_heads.clicked.connect(lambda: self.switch_to_tab(self.head_page))
+        self.btn_students.clicked.connect(lambda: self.switch_to_tab(self.student_list_page))
+        self.btn_registration.clicked.connect(lambda: self.switch_to_tab(self.registration_page))
         
         # Set default page
+        self.set_default_page()
+        
+    def switch_to_tab(self, page):
+        """Switch to specific tab with debugging"""
+        print(f"Switching to tab: {page.__class__.__name__}")
+        self.stack.setCurrentWidget(page)
+        print(f"Current widget is now: {self.stack.currentWidget().__class__.__name__}")
+        
+    # Set default page
+    def set_default_page(self):
         self.stack.setCurrentWidget(self.voucher_page)
 
 # Main execution block for direct running
