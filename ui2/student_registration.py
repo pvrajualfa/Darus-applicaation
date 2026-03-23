@@ -70,6 +70,20 @@ class StudentRegistration(QWidget):
         style_lineedit(self.city)
         self.annual_fee = EnhancedLineEdit()
         style_lineedit(self.annual_fee)
+        
+        # Academic Year dropdown
+        self.academic_year = EnhancedComboBox()
+        style_combo(self.academic_year)
+        current_year = QDate.currentDate().year()
+        academic_years = []
+        for year in range(current_year - 2, current_year + 3):
+            academic_years.append(f"{year}-{year+1}")
+        self.academic_year.addItems(academic_years)
+        # Set current academic year (June-May)
+        if QDate.currentDate().month() >= 6:
+            self.academic_year.setCurrentText(f"{current_year}-{current_year+1}")
+        else:
+            self.academic_year.setCurrentText(f"{current_year-1}-{current_year}")
 
         # Add fields to grid
         fields = [
@@ -79,7 +93,7 @@ class StudentRegistration(QWidget):
             ("Class", self.class_combo), ("Phone1", self.phone1),
             ("Phone2", self.phone2), ("Address", self.address),
             ("Location", self.location), ("City", self.city),
-            ("Annual Fee", self.annual_fee)
+            ("Annual Fee", self.annual_fee), ("Academic Year", self.academic_year)
         ]
 
         for i, (label_text, widget) in enumerate(fields):
@@ -128,7 +142,8 @@ class StudentRegistration(QWidget):
             format_text_for_db(self.address.text()),
             format_text_for_db(self.location.text()),
             format_text_for_db(self.city.text()),
-            self.annual_fee.text()
+            self.annual_fee.text(),
+            self.academic_year.currentText()
         )
 
         self.db.add_student(*data)
@@ -150,3 +165,9 @@ class StudentRegistration(QWidget):
         self.location.clear()
         self.city.clear()
         self.annual_fee.clear()
+        # Reset academic year to current
+        current_year = QDate.currentDate().year()
+        if QDate.currentDate().month() >= 6:
+            self.academic_year.setCurrentText(f"{current_year}-{current_year+1}")
+        else:
+            self.academic_year.setCurrentText(f"{current_year-1}-{current_year}")

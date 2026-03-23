@@ -9,6 +9,8 @@ class Database:
     def __init__(self):
         self.conn = sqlite3.connect(os.path.join(DATA_DIR, "school.db"))
         self.create_tables()
+        # Update existing students to current academic year
+        self.update_existing_students_academic_year()
 
     def create_tables(self):
         # Students table
@@ -30,6 +32,14 @@ class Database:
             annual_fee REAL
         )
         """)
+        
+        # Add academic_year column if it doesn't exist
+        try:
+            self.conn.execute("ALTER TABLE students ADD COLUMN academic_year TEXT")
+            print("Added academic_year column to students table")
+        except sqlite3.OperationalError:
+            # Column already exists
+            pass
 
         # Heads table
         self.conn.execute("""
@@ -70,16 +80,48 @@ class Database:
 
         self.conn.commit()
 
-    def add_student(self, student_id, name, father, aadhaar, dob, join_date, class_name, phone1, phone2, location, city, address, annual_fee):
+    def add_student(self, student_id, name, father, aadhaar, dob, join_date, class_name, phone1, phone2, location, city, address, annual_fee, academic_year):
         self.conn.execute("""
-        INSERT INTO students(student_id, name, father, aadhaar, dob, join_date, class, phone1, phone2, location, city, address, annual_fee)
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
-        """, (student_id, name, father, aadhaar, dob, join_date, class_name, phone1, phone2, location, city, address, annual_fee))
+        INSERT INTO students(student_id, name, father, aadhaar, dob, join_date, class, phone1, phone2, location, city, address, annual_fee, academic_year)
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        """, (student_id, name, father, aadhaar, dob, join_date, class_name, phone1, phone2, location, city, address, annual_fee, academic_year))
         self.conn.commit()
 
-    def get_students(self):
-        cur = self.conn.execute("SELECT * FROM students ORDER BY name")
+    def get_students(self, academic_year=None):
+        if academic_year:
+            cur = self.conn.execute("SELECT * FROM students WHERE academic_year=? ORDER BY name", (academic_year,))
+        else:
+            cur = self.conn.execute("SELECT * FROM students ORDER BY name")
         return cur.fetchall()
+
+    def get_students_by_academic_year(self, academic_year):
+        """Get students for a specific academic year"""
+        cur = self.conn.execute("SELECT * FROM students WHERE academic_year=? ORDER BY name", (academic_year,))
+        return cur.fetchall()
+
+    def update_all_students_to_2025_2026(self):
+        """Update all students to 2025-2026 academic year"""
+        academic_year = "2025-2026"
+        self.conn.execute("""
+        UPDATE students SET academic_year=?
+        """, (academic_year,))
+        self.conn.commit()
+        print(f"Updated all students to academic year: {academic_year}")
+
+    def update_existing_students_academic_year(self):
+        """Update existing students to current academic year if academic_year is NULL"""
+        from PySide6.QtCore import QDate
+        current_date = QDate.currentDate()
+        if current_date.month() >= 6:  # June or later
+            current_year = current_date.year()
+            academic_year = f"{current_year}-{current_year+1}"
+        else:  # Before June
+            academic_year = f"{current_date.year()-1}-{current_date.year()}"
+        
+        self.conn.execute("""
+        UPDATE students SET academic_year=? WHERE academic_year IS NULL OR academic_year=''
+        """, (academic_year,))
+        self.conn.commit()
 
     def get_all_heads(self):
         cur = self.conn.execute("SELECT id, type, name FROM heads ORDER BY type, name")

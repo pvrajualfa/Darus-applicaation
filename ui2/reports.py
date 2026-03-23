@@ -170,6 +170,26 @@ class FinancePage(QWidget):
        query += " ORDER BY date DESC"
        vouchers = self.db.conn.execute(query, params).fetchall()
        
+       # Handle empty data case
+       if not vouchers:
+           self.table.setRowCount(0)
+           self.table.setColumnCount(10)
+           self.table.setHorizontalHeaderLabels(["ID", "Date", "Type", "Head", "Subhead", "Student", "Class", "Amount", "Mode", "Note"])
+           
+           # Show empty state message
+           self.balance_summary.setText("""
+           <div style="text-align: center;">
+               <div style="margin: 10px 0; color: #666;">No records found for the selected criteria</div>
+               <div style="margin: 5px 0;">Bank Balance: Rs.0.00</div>
+               <div style="margin: 5px 0; color: #666;">Cash Balance: Rs.0.00</div>
+               <div style="margin: 10px 0; border-top: 1px solid #4CAF50; padding-top: 10px;">
+                   Total Income: Rs.0.00 | Total Expense: Rs.0.00
+               </div>
+           </div>
+           """)
+           style_table(self.table)
+           return
+       
        self.table.setRowCount(len(vouchers))
        self.table.setColumnCount(10)
        self.table.setHorizontalHeaderLabels(["ID", "Date", "Type", "Head", "Subhead", "Student", "Class", "Amount", "Mode", "Note"])
@@ -296,12 +316,41 @@ class FeePage(QWidget):
        print("FeePage: setup complete - waiting for user to click Load Report")
 
    def load_report(self):
-       students = self.db.get_students()
+       # Get students for selected academic year
+       selected_academic_year = self.academic_year.currentText()
+       students = self.db.get_students_by_academic_year(selected_academic_year)
        
        # Filter by class if selected
        selected_class = self.class_combo.currentText()
        if selected_class != "All":
            students = [s for s in students if s[7] == selected_class]
+       
+       # Handle empty data case
+       if not students:
+           self.table.setRowCount(0)
+           self.table.setColumnCount(9)
+           self.table.setHorizontalHeaderLabels([
+               "Student ID", "Name", "Father", "Mobile No", "Annual Fee", 
+               "Paid Amount", "Paid Installments", "Pending Amount", "Due Months"
+           ])
+           
+           # Show empty state message
+           if selected_class == "All":
+               class_text = "All Classes"
+           else:
+               class_text = f"Class {selected_class}"
+               
+           summary_text = f"""
+           <div style="text-align: center;">
+               <div style="margin: 10px 0; color: #666;">No students found in {class_text}</div>
+               <div style="margin: 5px 0;">Total Students: 0</div>
+               <div style="margin: 5px 0;">Total Pending Fees: Rs.0.00</div>
+               <div style="margin: 5px 0; color: #666;">Academic Year: {self.academic_year.currentText()} (June-May)</div>
+           </div>
+           """
+           self.summary.setText(summary_text)
+           style_table(self.table)
+           return
        
        # Calculate fee information
        fee_data = []
@@ -397,17 +446,32 @@ class FeePage(QWidget):
        
        style_table(self.table)
 
+   def get_academic_year_dates(self):
+       """Get start and end dates for the selected academic year"""
+       selected_year = self.academic_year.currentText()
+       start_year, end_year = map(int, selected_year.split('-'))
+       
+       # Academic year runs from June to May
+       start_date = f"01/06/{start_year}"
+       end_date = f"31/05/{end_year}"
+       
+       return start_date, end_date
+
    def get_total_paid(self, student_id):
-       """Get total amount paid by student from income vouchers"""
+       """Get total amount paid by student from income vouchers for selected academic year"""
+       start_date, end_date = self.get_academic_year_dates()
+       
        result = self.db.conn.execute(
-           "SELECT COALESCE(SUM(amount), 0) FROM vouchers WHERE student_name=? AND type='Income'",
-           (student_id,)
+           "SELECT COALESCE(SUM(amount), 0) FROM vouchers WHERE student_name=? AND type='Income' AND date BETWEEN ? AND ?",
+           (student_id, start_date, end_date)
        ).fetchone()
        return float(result[0]) if result and result[0] else 0.0
 
    def show_pending_fees(self):
        """Show only students with pending fees"""
-       students = self.db.get_students()
+       # Get students for selected academic year
+       selected_academic_year = self.academic_year.currentText()
+       students = self.db.get_students_by_academic_year(selected_academic_year)
        
        # Filter by class if selected
        selected_class = self.class_combo.currentText()
@@ -448,6 +512,32 @@ class FeePage(QWidget):
                    'due_months': due_months
                })
                total_pending += pending_amount
+       
+       # Handle empty data case
+       if not pending_students:
+           self.table.setRowCount(0)
+           self.table.setColumnCount(9)
+           self.table.setHorizontalHeaderLabels([
+               "Student ID", "Name", "Father", "Mobile No", "Annual Fee", 
+               "Paid Amount", "Paid Installments", "Pending Amount", "Due Months"
+           ])
+           
+           # Show empty state message
+           if selected_class == "All":
+               class_text = "All Classes"
+           else:
+               class_text = f"Class {selected_class}"
+               
+           summary_text = f"""
+           <div style="text-align: center;">
+               <div style="margin: 10px 0; color: #28a745;"><strong>No pending fees found in {class_text}</strong></div>
+               <div style="margin: 5px 0;">All students have paid their fees</div>
+               <div style="margin: 5px 0; color: #666;">Academic Year: {self.academic_year.currentText()} (June-May)</div>
+           </div>
+           """
+           self.summary.setText(summary_text)
+           style_table(self.table)
+           return
        
        # Display pending fees in table
        self.table.setRowCount(len(pending_students))

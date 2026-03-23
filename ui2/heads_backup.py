@@ -4,7 +4,7 @@ from .database import Database
 from .header import PageHeader
 from .common_table import style_table
 from .common_form import (EnhancedLineEdit, EnhancedComboBox, style_lineedit, 
-                         style_combo, style_button, style_groupbox, style_label)
+                         style_combo, style_button, style_groupbox)
 
 
 class HeadPage(QWidget):
@@ -21,142 +21,53 @@ class HeadPage(QWidget):
         layout = QVBoxLayout(self)
         layout.addWidget(PageHeader("Manage Heads"))
 
-        # Create a horizontal layout for forms (2-column layout)
-        forms_container = QWidget()
-        forms_layout = QHBoxLayout(forms_container)
-        forms_layout.setSpacing(20)  # Add spacing between form sections
-        forms_layout.setContentsMargins(10, 10, 10, 10)  # Add padding around forms
-        
-        # ================= ADD HEAD =================
+# ================= ADD HEAD =================
         head_group = QGroupBox("Add Head")
-        style_groupbox(head_group)
-        head_layout = QVBoxLayout()
-        head_layout.setSpacing(15)  # Add spacing between elements
-        head_layout.setContentsMargins(20, 30, 20, 20)  # Add padding
-        
-        # Head Type Section
-        type_container = QWidget()
-        type_layout = QVBoxLayout(type_container)
-        type_layout.setSpacing(5)
-        
-        type_label = QLabel("Type:")
-        style_label(type_label)
-        self.head_type = EnhancedComboBox()
-        self.head_type.addItems(["Income", "Expense"])
-        style_combo(self.head_type)
-        
-        type_layout.addWidget(type_label)
-        type_layout.addWidget(self.head_type)
-        head_layout.addWidget(type_container)
-        
-        # Head Name Section
-        name_container = QWidget()
-        name_layout = QVBoxLayout(name_container)
-        name_layout.setSpacing(5)
-        
-        name_label = QLabel("Head Name:")
-        style_label(name_label)
-        self.head_name = EnhancedLineEdit()
-        self.head_name.setPlaceholderText("Enter head name")
-        style_lineedit(self.head_name)
-        
-        name_layout.addWidget(name_label)
-        name_layout.addWidget(self.head_name)
-        head_layout.addWidget(name_container)
-        
-        # Button Section
-        button_container = QWidget()
-        button_layout = QHBoxLayout(button_container)
-        button_layout.setContentsMargins(0, 10, 0, 0)
-        
-        self.btn_add_head = QPushButton("Add Head")
-        style_button(self.btn_add_head)
-        button_layout.addStretch()
-        button_layout.addWidget(self.btn_add_head)
-        button_layout.addStretch()
-        
-        head_layout.addWidget(button_container)
-        
-        head_group.setLayout(head_layout)
-        forms_layout.addWidget(head_group, 1)  # Add stretch factor for equal width
+        head_layout = QFormLayout()
 
-        # ================= ADD SUBHEAD =================
+        self.head_type = QComboBox()
+        self.head_type.addItems(["Income", "Expense"])
+
+        self.head_name = QLineEdit()
+
+        self.btn_add_head = QPushButton("Add Head")
+
+        head_layout.addRow("Type", self.head_type)
+        head_layout.addRow("Head Name", self.head_name)
+        head_layout.addRow(self.btn_add_head)
+
+        head_group.setLayout(head_layout)
+        layout.addWidget(head_group)
+
+# ================= ADD SUBHEAD =================
         sub_group = QGroupBox("Add Subhead")
-        style_groupbox(sub_group)
-        sub_layout = QVBoxLayout()
-        sub_layout.setSpacing(15)  # Add spacing between elements
-        sub_layout.setContentsMargins(20, 30, 20, 20)  # Add padding
-        
-        # Subhead Type Section
-        sub_type_container = QWidget()
-        sub_type_layout = QVBoxLayout(sub_type_container)
-        sub_type_layout.setSpacing(5)
-        
-        sub_type_label = QLabel("Type:")
-        style_label(sub_type_label)
-        self.sub_type = EnhancedComboBox()
+        sub_layout = QFormLayout()
+
+        self.sub_type = QComboBox()
         self.sub_type.addItems(["Income", "Expense"])
-        style_combo(self.sub_type)
-        
-        sub_type_layout.addWidget(sub_type_label)
-        sub_type_layout.addWidget(self.sub_type)
-        sub_layout.addWidget(sub_type_container)
-        
-        # Head Selection Section
-        head_container = QWidget()
-        head_layout = QVBoxLayout(head_container)
-        head_layout.setSpacing(5)
-        
-        head_label = QLabel("Head:")
-        style_label(head_label)
-        self.sub_head_combo = EnhancedComboBox()
-        style_combo(self.sub_head_combo)
-        
-        head_layout.addWidget(head_label)
-        head_layout.addWidget(self.sub_head_combo)
-        sub_layout.addWidget(head_container)
-        
-        # Subhead Name Section
-        sub_name_container = QWidget()
-        sub_name_layout = QVBoxLayout(sub_name_container)
-        sub_name_layout.setSpacing(5)
-        
-        sub_name_label = QLabel("Subhead Name:")
-        style_label(sub_name_label)
-        self.sub_name = EnhancedLineEdit()
+
+        self.sub_head_combo = QComboBox()
+
+        self.sub_name = QLineEdit()
         self.sub_name.setPlaceholderText("Select Head")
         self.sub_name.setEnabled(False)
-        style_lineedit(self.sub_name)
-        
-        sub_name_layout.addWidget(sub_name_label)
-        sub_name_layout.addWidget(self.sub_name)
-        sub_layout.addWidget(sub_name_container)
-        
-        # Button Section
-        sub_button_container = QWidget()
-        sub_button_layout = QHBoxLayout(sub_button_container)
-        sub_button_layout.setContentsMargins(0, 10, 0, 0)
-        
-        self.btn_add_sub = QPushButton("Add Subhead")
-        style_button(self.btn_add_sub)
-        sub_button_layout.addStretch()
-        sub_button_layout.addWidget(self.btn_add_sub)
-        sub_button_layout.addStretch()
-        
-        sub_layout.addWidget(sub_button_container)
-        
-        sub_group.setLayout(sub_layout)
-        forms_layout.addWidget(sub_group, 1)  # Add stretch factor for equal width
-        
-        # Add forms container to main layout
-        layout.addWidget(forms_container)
 
-        # ================= TABLE =================
+        self.btn_add_sub = QPushButton("Add Subhead")
+
+        sub_layout.addRow("Type", self.sub_type)
+        sub_layout.addRow("Head", self.sub_head_combo)
+        sub_layout.addRow("Subhead", self.sub_name)
+        sub_layout.addRow(self.btn_add_sub)
+
+        sub_group.setLayout(sub_layout)
+        layout.addWidget(sub_group)
+
+# ================= TABLE =================
         self.table = QTableWidget()
         self.table.setAlternatingRowColors(True)
         layout.addWidget(self.table)
 
-        # ================= CONNECT =================
+# ================= CONNECT =================
         self.btn_add_head.clicked.connect(self.add_head_master)
         self.btn_add_sub.clicked.connect(self.add_sub_master)
 
@@ -164,11 +75,11 @@ class HeadPage(QWidget):
         self.sub_type.currentTextChanged.connect(self.set_subhead_mode)
         self.sub_head_combo.currentIndexChanged.connect(self.head_selected)
 
-        # ================= LOAD =================
+# ================= LOAD =================
         self.load_heads_for_sub()
         self.switch_table_mode()
 
-    # ================= MODE =================
+# ================= MODE =================
     def set_head_mode(self):
         self.entry_mode = "HEAD"
         self.switch_table_mode()
@@ -178,7 +89,7 @@ class HeadPage(QWidget):
         self.load_heads_for_sub()
         self.switch_table_mode()
 
-    # ================= LOAD HEADS =================
+# ================= LOAD HEADS =================
     def load_heads_for_sub(self):
 
         self.sub_head_combo.clear()
@@ -195,7 +106,7 @@ class HeadPage(QWidget):
         if self.entry_mode == "SUBHEAD":
             self.switch_table_mode()
 
-    # ================= HEAD SELECT =================
+# ================= HEAD SELECT =================
     def head_selected(self):
 
         head = self.sub_head_combo.currentText()
@@ -210,7 +121,7 @@ class HeadPage(QWidget):
         self.sub_name.setPlaceholderText("Enter Subhead")
         self.switch_table_mode()
 
-    # ================= SWITCH TABLE =================
+# ================= SWITCH TABLE =================
     def switch_table_mode(self):
 
         if self.entry_mode == "HEAD":
@@ -224,7 +135,7 @@ class HeadPage(QWidget):
         else:
             self.show_subheads_table()
 
-    # ================= ADD HEAD =================
+# ================= ADD HEAD =================
     def add_head_master(self):
 
         typ = self.head_type.currentText()
@@ -253,7 +164,7 @@ class HeadPage(QWidget):
         self.load_heads_for_sub()
         self.set_head_mode()
 
-    # ================= ADD SUBHEAD =================
+# ================= ADD SUBHEAD =================
     def add_sub_master(self):
 
         typ = self.sub_type.currentText()
@@ -273,7 +184,7 @@ class HeadPage(QWidget):
         self.show_subheads_table()
         self.set_subhead_mode()
 
-    # ================= SHOW HEADS =================
+# ================= SHOW HEADS =================
     def show_heads_table(self):
 
         typ = self.head_type.currentText() if self.entry_mode == "HEAD" \
@@ -301,7 +212,7 @@ class HeadPage(QWidget):
         self.table.resizeColumnsToContents()
         style_table(self.table)
 
-    # ================= SHOW SUBHEADS =================
+# ================= SHOW SUBHEADS =================
     def show_subheads_table(self):
 
         typ = self.sub_type.currentText()
